@@ -13,7 +13,7 @@ See <http://github.com/ActiveState/appdirs> for details and usage.
 # - Mac OS X: http://developer.apple.com/documentation/MacOSX/Conceptual/BPFileSystem/index.html
 # - XDG spec for Un*x: http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
 
-__version__ = "1.4.4"
+__version__ = "1.4.4.1"
 __version_info__ = tuple(int(segment) for segment in __version__.split("."))
 
 
@@ -352,6 +352,22 @@ def user_state_dir(appname=None, appauthor=None, version=None, roaming=False):
         path = os.path.join(path, version)
     return path
 
+def system_temp_dir(appname=None, appauthor=None, version=None):
+    r"""Return full path to the system temp dir.
+
+        https://github.com/ActiveState/appdirs/issues/93
+
+    """
+    if "TMP" in os.environ:
+        path = os.environ["TMP"]
+    elif "TEMP" in os.environ:
+        path = os.environ["TEMP"]
+    elif system == "win32":
+        path = "C:\\temp"
+    else:
+        path = "/tmp"
+    return path
+
 
 def user_log_dir(appname=None, appauthor=None, version=None, opinion=True):
     r"""Return full path to the user-specific log dir for this application.
@@ -449,6 +465,10 @@ class AppDirs(object):
         return user_log_dir(self.appname, self.appauthor,
                             version=self.version)
 
+    @property
+    def system_temp_dir(self):
+        return system_temp_dir(self.appname, self.appauthor,
+                            version=self.version)
 
 #---- internal support stuff
 
@@ -583,7 +603,8 @@ if __name__ == "__main__":
              "user_state_dir",
              "user_log_dir",
              "site_data_dir",
-             "site_config_dir")
+             "site_config_dir",
+             "system_temp_dir")
 
     print("-- app dirs %s --" % __version__)
 
